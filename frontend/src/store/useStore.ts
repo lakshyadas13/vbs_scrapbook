@@ -21,7 +21,28 @@ export interface CoupleSettings {
 export interface Mood {
   id: string;
   user_id: string;
-  mood_type: 'in_love' | 'miss_you' | 'dreaming' | 'celeb';
+  mood_type: 'in_love' | 'miss_you' | 'dreaming' | 'angry';
+}
+
+export interface LoveLetter {
+  id: string;
+  couple_id: string;
+  sender_id: string;
+  category: 'sad' | 'miss_me' | 'motivation' | 'general';
+  title: string;
+  content: string;
+  created_at: string;
+}
+
+export interface Memory {
+  id: string;
+  couple_id: string;
+  user_id: string;
+  title: string;
+  description: string | null;
+  image_url: string;
+  memory_date: string;
+  created_at: string;
 }
 
 export interface GoodThing {
@@ -83,6 +104,8 @@ interface AppState {
   oopsies: Oopsie[];
   plans: Plan[];
   checklist: ChecklistItem[];
+  loveLetters: LoveLetter[];
+  memories: Memory[];
   isLoading: boolean;
   error: string | null;
   
@@ -110,6 +133,10 @@ interface AppState {
   addChecklistItem: (task: string) => Promise<void>;
   toggleChecklistItem: (id: string, completed: boolean) => Promise<void>;
   deleteChecklistItem: (id: string) => Promise<void>;
+  addLoveLetter: (letter: Omit<LoveLetter, 'id' | 'sender_id' | 'couple_id' | 'created_at'>) => Promise<void>;
+  deleteLoveLetter: (id: string) => Promise<void>;
+  addMemory: (memory: Omit<Memory, 'id' | 'user_id' | 'couple_id' | 'created_at'>) => Promise<void>;
+  deleteMemory: (id: string) => Promise<void>;
   
   subscribeRealtime: () => () => void;
 }
@@ -222,15 +249,19 @@ export const useStore = create<AppState>((set, get) => ({
     { id: 'c1', couple_id: 'mock-couple-id', task: 'Book the rooftop table', is_completed: false, created_at: new Date().toISOString() },
     { id: 'c2', couple_id: 'mock-couple-id', task: 'Charge the camera', is_completed: true, created_at: new Date().toISOString() },
   ]),
+  loveLetters: getLocal('doodly_letters', []),
+  memories: getLocal('doodly_memories', []),
   isLoading: false,
   error: null,
 
   setSession: (session) => {
     set({ session });
     if (!session) {
-      set({ currentUser: null, coupleSettings: null });
+      set({ currentUser: null, coupleSettings: null, loveLetters: [], memories: [] });
       removeLocal('doodly_user');
       removeLocal('doodly_settings');
+      removeLocal('doodly_letters');
+      removeLocal('doodly_memories');
     }
   },
 
@@ -292,6 +323,8 @@ export const useStore = create<AppState>((set, get) => ({
         oopsies: [],
         plans: [],
         checklist: [],
+        loveLetters: [],
+        memories: [],
       });
       removeLocal('doodly_user');
       removeLocal('doodly_settings');
@@ -301,6 +334,8 @@ export const useStore = create<AppState>((set, get) => ({
       removeLocal('doodly_oopsies');
       removeLocal('doodly_plans');
       removeLocal('doodly_checklist');
+      removeLocal('doodly_letters');
+      removeLocal('doodly_memories');
     } catch (err: any) {
       set({ error: err.message });
     } finally {
@@ -482,6 +517,30 @@ export const useStore = create<AppState>((set, get) => ({
       if (checklist) {
         set({ checklist });
         setLocal('doodly_checklist', checklist);
+      }
+
+      // 10. Fetch love letters
+      const { data: loveLetters } = await supabase
+        .from('love_letters')
+        .select('*')
+        .eq('couple_id', profile.couple_id)
+        .order('created_at', { ascending: false });
+
+      if (loveLetters) {
+        set({ loveLetters: loveLetters as LoveLetter[] });
+        setLocal('doodly_letters', loveLetters);
+      }
+
+      // 11. Fetch memories
+      const { data: memories } = await supabase
+        .from('memories')
+        .select('*')
+        .eq('couple_id', profile.couple_id)
+        .order('memory_date', { ascending: false });
+
+      if (memories) {
+        set({ memories: memories as Memory[] });
+        setLocal('doodly_memories', memories);
       }
 
     } catch (err: any) {
@@ -761,6 +820,99 @@ export const useStore = create<AppState>((set, get) => ({
     }
   },
 
+  addLoveLetter: async (letter) => {
+    const { currentUser } = get();
+    if (!currentUser || !currentUser.couple_id) return;
+
+    if (!isSupabaseConfigured) {
+      const newLetter: LoveLetter = {
+        ...letter,
+        id: Math.random().toString(),
+        sender_id: currentUser.id,
+        couple_id: currentUser.couple_id,
+        created_at: new Date().toISOString(),
+      };
+      const updated = [newLetter, ...get().loveLetters];
+      set({ loveLetters: updated });
+      setLocal('doodly_letters', updated);
+      return;
+    }
+
+    try {
+      await supabase.from('love_letters').insert({
+        couple_id: currentUser.couple_id,
+        sender_id: currentUser.id,
+        category: letter.category,
+        title: letter.title,
+        content: letter.content,
+      });
+    } catch (err: any) {
+      console.error('Error saving love letter:', err);
+    }
+  },
+
+  deleteLoveLetter: async (id) => {
+    const original = get().loveLetters;
+    set({ loveLetters: original.filter(l => l.id !== id) });
+    setLocal('doodly_letters', get().loveLetters);
+
+    if (!isSupabaseConfigured) return;
+
+    try {
+      await supabase.from('love_letters').delete().eq('id', id);
+    } catch (err: any) {
+      set({ loveLetters: original });
+      console.error('Error deleting love letter:', err);
+    }
+  },
+
+  addMemory: async (memory) => {
+    const { currentUser } = get();
+    if (!currentUser || !currentUser.couple_id) return;
+
+    if (!isSupabaseConfigured) {
+      const newMemory: Memory = {
+        ...memory,
+        id: Math.random().toString(),
+        user_id: currentUser.id,
+        couple_id: currentUser.couple_id,
+        created_at: new Date().toISOString(),
+      };
+      const updated = [newMemory, ...get().memories].sort((a, b) => b.memory_date.localeCompare(a.memory_date));
+      set({ memories: updated });
+      setLocal('doodly_memories', updated);
+      return;
+    }
+
+    try {
+      await supabase.from('memories').insert({
+        couple_id: currentUser.couple_id,
+        user_id: currentUser.id,
+        title: memory.title,
+        description: memory.description,
+        image_url: memory.image_url,
+        memory_date: memory.memory_date,
+      });
+    } catch (err: any) {
+      console.error('Error saving memory:', err);
+    }
+  },
+
+  deleteMemory: async (id) => {
+    const original = get().memories;
+    set({ memories: original.filter(m => m.id !== id) });
+    setLocal('doodly_memories', get().memories);
+
+    if (!isSupabaseConfigured) return;
+
+    try {
+      await supabase.from('memories').delete().eq('id', id);
+    } catch (err: any) {
+      set({ memories: original });
+      console.error('Error deleting memory:', err);
+    }
+  },
+
   subscribeRealtime: () => {
     if (!isSupabaseConfigured) return () => {};
 
@@ -870,6 +1022,38 @@ export const useStore = create<AppState>((set, get) => ({
               checklist: get().checklist.filter(c => c.id !== oldRecord.id),
             });
             setLocal('doodly_checklist', get().checklist);
+          }
+        }
+        
+        else if (table === 'love_letters') {
+          if (newRecord && (newRecord as any).couple_id !== currentUser.couple_id) return;
+          if (eventType === 'INSERT') {
+            const exists = get().loveLetters.some(l => l.id === newRecord.id);
+            if (!exists) {
+              const updated = [newRecord as LoveLetter, ...get().loveLetters];
+              set({ loveLetters: updated });
+              setLocal('doodly_letters', updated);
+            }
+          } else if (eventType === 'DELETE') {
+            const updated = get().loveLetters.filter(l => l.id !== oldRecord.id);
+            set({ loveLetters: updated });
+            setLocal('doodly_letters', updated);
+          }
+        }
+        
+        else if (table === 'memories') {
+          if (newRecord && (newRecord as any).couple_id !== currentUser.couple_id) return;
+          if (eventType === 'INSERT') {
+            const exists = get().memories.some(m => m.id === newRecord.id);
+            if (!exists) {
+              const updated = [newRecord as Memory, ...get().memories].sort((a, b) => b.memory_date.localeCompare(a.memory_date));
+              set({ memories: updated });
+              setLocal('doodly_memories', updated);
+            }
+          } else if (eventType === 'DELETE') {
+            const updated = get().memories.filter(m => m.id !== oldRecord.id);
+            set({ memories: updated });
+            setLocal('doodly_memories', updated);
           }
         }
       })

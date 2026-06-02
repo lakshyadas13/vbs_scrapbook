@@ -27,6 +27,12 @@ export default function Navbar() {
     { href: '/good-things', label: 'Surprise', icon: 'card_giftcard' },
   ];
 
+  const desktopNavItems = [
+    ...navItems,
+    { href: '/love-letters', label: 'Letters', icon: 'mail' },
+    { href: '/memory-timeline', label: 'Timeline', icon: 'photo_library' },
+  ];
+
   const currentAvatar = currentUser?.role === 'lakshya' ? LAKSHYA_AVATAR : PARTNER_AVATAR;
 
   return (
@@ -61,7 +67,7 @@ export default function Navbar() {
           
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-6">
-            {navItems.map((item) => {
+            {desktopNavItems.map((item) => {
               const isActive = pathname === item.href;
               return (
                 <Link key={item.href} href={item.href}>

@@ -37,7 +37,7 @@ create table public.couple_settings (
 create table public.moods (
     id uuid primary key default gen_random_uuid(),
     user_id uuid references auth.users on delete cascade unique,
-    mood_type text not null check (mood_type in ('in_love', 'miss_you', 'dreaming', 'celeb')),
+    mood_type text not null check (mood_type in ('in_love', 'miss_you', 'dreaming', 'angry')),
     created_at timestamp with time zone default now()
 );
 
@@ -95,6 +95,30 @@ create table public.plans_checklist (
     is_completed boolean default false not null,
     created_at timestamp with time zone default now()
 );
+
+-- 1.10 LOVE LETTERS TABLE
+create table public.love_letters (
+    id uuid primary key default gen_random_uuid(),
+    couple_id uuid references public.couples(id) on delete cascade not null,
+    sender_id uuid references auth.users on delete cascade not null,
+    category text not null check (category in ('sad', 'miss_me', 'motivation', 'general')),
+    title text not null,
+    content text not null,
+    created_at timestamp with time zone default now()
+);
+
+-- 1.11 MEMORIES TABLE
+create table public.memories (
+    id uuid primary key default gen_random_uuid(),
+    couple_id uuid references public.couples(id) on delete cascade not null,
+    user_id uuid references auth.users on delete cascade not null,
+    title text not null,
+    description text,
+    image_url text not null,
+    memory_date date not null default current_date,
+    created_at timestamp with time zone default now()
+);
+
 
 -- ==========================================
 -- 2. ROW LEVEL SECURITY (RLS) & POLICIES
@@ -269,6 +293,38 @@ create policy "Allow couple members to manage plans_checklist"
         )
     );
 
+-- 2.10 Love Letters Policies
+alter table public.love_letters enable row level security;
+
+create policy "Allow couple members to manage love letters"
+    on public.love_letters for all
+    using (
+        couple_id in (
+            select couple_id from public.profiles where id = auth.uid()
+        )
+    )
+    with check (
+        couple_id in (
+            select couple_id from public.profiles where id = auth.uid()
+        )
+    );
+
+-- 2.11 Memories Policies
+alter table public.memories enable row level security;
+
+create policy "Allow couple members to manage memories"
+    on public.memories for all
+    using (
+        couple_id in (
+            select couple_id from public.profiles where id = auth.uid()
+        )
+    )
+    with check (
+        couple_id in (
+            select couple_id from public.profiles where id = auth.uid()
+        )
+    );
+
 -- ==========================================
 -- 3. REALTIME PUBLICATIONS
 -- ==========================================
@@ -280,7 +336,9 @@ begin;
     public.good_things, 
     public.oopsies, 
     public.plans, 
-    public.plans_checklist;
+    public.plans_checklist,
+    public.love_letters,
+    public.memories;
 commit;
 
 -- ==========================================

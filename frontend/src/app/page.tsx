@@ -27,11 +27,11 @@ const MOOD_ASSETS = {
     bg: 'bg-primary-container/20',
     src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBLf0K3LtdffgzV0IM0XwzBT_jRs5QF8UyildkNlUI9TFyXfyCmKkLX70C3KPtFuuo0fsJ76A1qgjjyDSzaIm42uX-S7q8DiQQhPUYYOGWFDrdkA8gy_aZwRosWAid9RBXf1gjFdCFTwlH9B0v10gzfbZ_LHzXN7Dtc7aQTvknW3Lew2AG15CVMZJIMUSaXXMtmS0OAWIYclsz3xcHhDl32-IZmmS_BPX0VWQlBn4-0zBR1OjQCXp6krYC5mGfSXhs4OcdqympoFj48',
   },
-  celeb: {
-    emoji: '🥳',
-    label: 'Celeb',
-    bg: 'bg-secondary-fixed',
-    src: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCsA6p7ONeujHp_GBnqx9CaJsFDeWc4b2v2Aj6enuqAILz8bSo-JeXV0LAD7_IxnysDuEwQFdimKPb0RN_za_1_2VGcOxZpxbjXmObNlOp8c-kTplJDwZGWw-uerE3128wKpcV6ueXtLkC1bPGV92clGp7T9ztFyCnGp8hjLCLTkJ5cgt_k4IFWmBPxgKwSfQGKp-Ibtirt1P1GDCgTgswjR-0uuKH4K62AOzTnlbcoZsOU-35fg0__lCiVAmv0ej2pzFMYH0KRipRW',
+  angry: {
+    emoji: '😡',
+    label: 'Angry',
+    bg: 'bg-red-100/60',
+    src: 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ccircle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22%23FF8A80%22 stroke=%22black%22 stroke-width=%223%22/%3E%3Cpath d=%22M 28 36 L 42 42%22 stroke=%22black%22 stroke-width=%224%22 stroke-linecap=%22round%22/%3E%3Cpath d=%22M 72 36 L 58 42%22 stroke=%22black%22 stroke-width=%224%22 stroke-linecap=%22round%22/%3E%3Ccircle cx=%2235%22 cy=%2248%22 r=%225%22 fill=%22black%22/%3E%3Ccircle cx=%2265%22 cy=%2248%22 r=%225%22 fill=%22black%22/%3E%3Cpath d=%22M 38 68 Q 50 58 62 68%22 fill=%22none%22 stroke=%22black%22 stroke-width=%224%22 stroke-linecap=%22round%22/%3E%3C/svg%3E',
   },
 };
 
@@ -49,6 +49,8 @@ export default function HomeDashboard() {
     moods, 
     loveTaps, 
     goodThings, 
+    loveLetters,
+    memories,
     updateMood, 
     incrementLoveTaps,
     addGoodThing,
@@ -315,6 +317,79 @@ export default function HomeDashboard() {
             <Link href="/progress" className="w-full">
               <button className="sticker-btn w-full py-2 bg-secondary text-white text-lg rounded-sm active:translate-y-1 hover:scale-102 transition-transform">
                 Go to Tapper Page
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Love Letter Vault Card */}
+        <div className="md:col-span-6 taped-paper sketchy-border p-6 relative bg-amber-50/60 hover:rotate-1 transition-all duration-300 flex flex-col justify-between min-h-[300px]">
+          <span className="material-symbols-outlined absolute -top-4 -right-2 text-primary/30 text-4xl rotate-12">drafts</span>
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-gloria text-2xl text-primary flex items-center gap-2">
+                <span>💌 Love Letter Vault</span>
+              </h3>
+              <span className="bg-primary-container text-on-primary-container font-patrick px-2.5 py-0.5 rounded-full text-sm">
+                {loveLetters.length} letters
+              </span>
+            </div>
+            <p className="font-patrick text-lg text-on-surface-variant mb-4 leading-relaxed">
+              Store sweet letters for your partner to open when they are sad, miss you, or need motivation. Only one partner-written letter can be opened per day!
+            </p>
+          </div>
+          
+          <div className="flex flex-col gap-3">
+            <div className="bg-white/80 p-3 rounded border border-dashed border-primary/30 font-patrick text-sm text-outline italic">
+              {loveLetters.length > 0 ? (
+                <>Last letter written {new Date(loveLetters[0].created_at).toLocaleDateString()}</>
+              ) : (
+                <>Your vault is empty! Write a letter to start.</>
+              )}
+            </div>
+            <Link href="/love-letters" className="w-full">
+              <button className="sticker-btn w-full py-2.5 bg-primary text-white text-lg rounded-sm active:translate-y-0.5 hover:scale-[1.01] transition-transform font-patrick">
+                Open Letter Vault
+              </button>
+            </Link>
+          </div>
+        </div>
+
+        {/* Memory Timeline Card */}
+        <div className="md:col-span-6 polaroid flex flex-col items-center bg-white justify-between min-h-[300px] hover:-rotate-1 transition-all duration-300">
+          <div className="w-full">
+            <div className="flex justify-between items-center mb-4 px-2">
+              <h3 className="font-gloria text-2xl text-primary flex items-center gap-2">
+                <span>📸 Memory Timeline</span>
+              </h3>
+              <span className="bg-secondary-container text-on-secondary-container font-patrick px-2.5 py-0.5 rounded-full text-sm">
+                {memories.length} polaroids
+              </span>
+            </div>
+          </div>
+          
+          <div className="w-full flex-grow flex items-center justify-center py-2">
+            {memories.length > 0 ? (
+              <div className="flex gap-4 items-center w-full max-w-[320px] bg-surface-container-lowest border border-outline-variant p-2 shadow-sm rounded-sm rotate-1">
+                <div className="w-20 h-20 bg-cover bg-center rounded-sm flex-shrink-0" style={{ backgroundImage: `url(${memories[0].image_url})` }}></div>
+                <div className="flex-grow min-w-0">
+                  <p className="font-gloria text-base text-on-surface truncate">{memories[0].title}</p>
+                  <p className="font-patrick text-sm text-on-surface-variant truncate">{memories[0].description || 'Sweet memory'}</p>
+                  <p className="font-patrick text-xs text-outline mt-1">{new Date(memories[0].memory_date).toLocaleDateString()}</p>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center font-patrick text-outline py-6">
+                <span className="material-symbols-outlined text-4xl block mb-1">add_a_photo</span>
+                <p>Pin polaroids on your scrapbook board!</p>
+              </div>
+            )}
+          </div>
+          
+          <div className="w-full mt-4 px-2">
+            <Link href="/memory-timeline" className="w-full">
+              <button className="sticker-btn w-full py-2.5 bg-secondary text-white text-lg rounded-sm active:translate-y-0.5 hover:scale-[1.01] transition-transform font-patrick">
+                View Polaroid Timeline
               </button>
             </Link>
           </div>
