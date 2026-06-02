@@ -7,7 +7,7 @@ import { useStore } from '@/store/useStore';
 import { triggerSparkles } from '@/utils/sparkles';
 import { useEffect } from 'react';
 
-const LAKSHYA_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Virat_Kohli_in_PMO_New_Delhi.jpg';
+const LAKSHYA_AVATAR = 'https://upload.wikimedia.org/wikipedia/en/7/70/Crayon_Shin-chan.png';
 const PARTNER_AVATAR = 'https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_portrait.png';
 
 export default function Navbar() {
