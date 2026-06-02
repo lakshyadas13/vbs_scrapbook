@@ -13,15 +13,7 @@ const PARTNER_AVATAR = 'https://lh3.googleusercontent.com/aida-public/AB6AXuA2vF
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, subscribeRealtime, fetchInitialData } = useStore();
-
-  useEffect(() => {
-    fetchInitialData();
-    const unsubscribe = subscribeRealtime();
-    return () => {
-      unsubscribe();
-    };
-  }, [fetchInitialData, subscribeRealtime]);
+  const { currentUser } = useStore();
 
   const handleTopHeartClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     triggerSparkles(e.clientX, e.clientY, 'tapper');
