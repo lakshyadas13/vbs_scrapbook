@@ -5,6 +5,9 @@ import { useStore, Mood } from '@/store/useStore';
 import { triggerSparkles } from '@/utils/sparkles';
 import Link from 'next/link';
 
+const LAKSHYA_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Virat_Kohli_in_PMO_New_Delhi.jpg';
+const PARTNER_AVATAR = 'https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_portrait.png';
+
 const MOOD_ASSETS = {
   in_love: {
     emoji: '🥰',
@@ -71,14 +74,14 @@ export default function HomeDashboard() {
     setMounted(true);
   }, []);
 
-  // Live Timer Calculation since 31st March 2025 12:53 AM
+  // Live Timer Calculation since 31st March 2026 12:53 AM
   useEffect(() => {
-    let startDateTime = new Date('2025-03-31T00:53:00+05:30'); // Default 31st March 2025, 12:53 AM IST
+    let startDateTime = new Date('2026-03-31T00:53:00+05:30'); // Default 31st March 2026, 12:53 AM IST
     
     if (coupleSettings?.anniversary_date) {
       const customDate = coupleSettings.anniversary_date;
-      if (customDate === '2025-04-01' || customDate === '2025-03-31') {
-        startDateTime = new Date('2025-03-31T00:53:00+05:30');
+      if (customDate === '2025-04-01' || customDate === '2025-03-31' || customDate === '2026-03-31') {
+        startDateTime = new Date('2026-03-31T00:53:00+05:30');
       } else {
         startDateTime = new Date(`${customDate}T00:53:00`);
       }
@@ -232,7 +235,7 @@ export default function HomeDashboard() {
                 <img 
                   alt="My Profile" 
                   className="w-full h-full object-cover"
-                  src={currentUser?.role === 'lakshya' ? 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-OmVxzBCPD0Lh6rTWxXk4B9LfcvRZuVKj8Gz_enOrsCf70O_WhsW0F80C8ulJwUuqAQiqpkfvCwaI748Pb7NC_nZN96BBbBrUBtqbb0a1jVMVA2dcc3AFSs0Pw6wY7TSmRtPEfRKYWoyjrFiP8M6abbnim0apy2zz_6QJnTcSAWeiv2OlLYs5hABipuJKUDsTgfKP75-Ot2W04pYX-oaU7zx4tcbNW6pDneQ9hpyiWGCO7ahHs2uoXmA1ulnLYvsS34KOtzAq-rSV' : 'https://lh3.googleusercontent.com/aida-public/AB6AXuA2vFRmTvpOxwPjeLgUCwyPubAbgfpkhfjCbqkPSY4v1Hcj_-7XNQ12mkRsedW-JZJgirpjiXaS2FD1iHHiTEjGrh7_VDU-1zFfvaaLZIsjl-Bg9ZJFcpTjLo8JrIDqgEDQxktDO-wqlWwdaUsuhJenfyohMBZqjf454XSXb_JJ0D4GJroBhpRsnFklYLOhshpshrnX3fQVikMTtgYBa-TmsI5HcQQ71HXh-E5sbnDK71mRMLshFPwO9UnszVnrcS1AuCVa7fWr0Ez-'} 
+                  src={currentUser?.role === 'lakshya' ? LAKSHYA_AVATAR : PARTNER_AVATAR} 
                 />
               </div>
               <div>
@@ -246,7 +249,7 @@ export default function HomeDashboard() {
                 <img 
                   alt="Partner Profile" 
                   className="w-full h-full object-cover"
-                  src={currentUser?.role === 'lakshya' ? 'https://lh3.googleusercontent.com/aida-public/AB6AXuA2vFRmTvpOxwPjeLgUCwyPubAbgfpkhfjCbqkPSY4v1Hcj_-7XNQ12mkRsedW-JZJgirpjiXaS2FD1iHHiTEjGrh7_VDU-1zFfvaaLZIsjl-Bg9ZJFcpTjLo8JrIDqgEDQxktDO-wqlWwdaUsuhJenfyohMBZqjf454XSXb_JJ0D4GJroBhpRsnFklYLOhshpshrnX3fQVikMTtgYBa-TmsI5HcQQ71HXh-E5sbnDK71mRMLshFPwO9UnszVnrcS1AuCVa7fWr0Ez-' : 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-OmVxzBCPD0Lh6rTWxXk4B9LfcvRZuVKj8Gz_enOrsCf70O_WhsW0F80C8ulJwUuqAQiqpkfvCwaI748Pb7NC_nZN96BBbBrUBtqbb0a1jVMVA2dcc3AFSs0Pw6wY7TSmRtPEfRKYWoyjrFiP8M6abbnim0apy2zz_6QJnTcSAWeiv2OlLYs5hABipuJKUDsTgfKP75-Ot2W04pYX-oaU7zx4tcbNW6pDneQ9hpyiWGCO7ahHs2uoXmA1ulnLYvsS34KOtzAq-rSV'} 
+                  src={currentUser?.role === 'lakshya' ? PARTNER_AVATAR : LAKSHYA_AVATAR} 
                 />
               </div>
               <div>

@@ -7,8 +7,8 @@ import { useStore } from '@/store/useStore';
 import { triggerSparkles } from '@/utils/sparkles';
 import { useEffect } from 'react';
 
-const LAKSHYA_AVATAR = 'https://lh3.googleusercontent.com/aida-public/AB6AXuA-OmVxzBCPD0Lh6rTWxXk4B9LfcvRZuVKj8Gz_enOrsCf70O_WhsW0F80C8ulJwUuqAQiqpkfvCwaI748Pb7NC_nZN96BBbBrUBtqbb0a1jVMVA2dcc3AFSs0Pw6wY7TSmRtPEfRKYWoyjrFiP8M6abbnim0apy2zz_6QJnTcSAWeiv2OlLYs5hABipuJKUDsTgfKP75-Ot2W04pYX-oaU7zx4tcbNW6pDneQ9hpyiWGCO7ahHs2uoXmA1ulnLYvsS34KOtzAq-rSV';
-const PARTNER_AVATAR = 'https://lh3.googleusercontent.com/aida-public/AB6AXuA2vFRmTvpOxwPjeLgUCwyPubAbgfpkhfjCbqkPSY4v1Hcj_-7XNQ12mkRsedW-JZJgirpjiXaS2FD1iHHiTEjGrh7_VDU-1zFfvaaLZIsjl-Bg9ZJFcpTjLo8JrIDqgEDQxktDO-wqlWwdaUsuhJenfyohMBZqjf454XSXb_JJ0D4GJroBhpRsnFklYLOhshpshrnX3fQVikMTtgYBa-TmsI5HcQQ71HXh-E5sbnDK71mRMLshFPwO9UnszVnrcS1AuCVa7fWr0Ez-';
+const LAKSHYA_AVATAR = 'https://upload.wikimedia.org/wikipedia/commons/7/7e/Virat_Kohli_in_PMO_New_Delhi.jpg';
+const PARTNER_AVATAR = 'https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_portrait.png';
 
 export default function Navbar() {
   const pathname = usePathname();
