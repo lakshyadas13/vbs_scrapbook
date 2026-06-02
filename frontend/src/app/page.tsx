@@ -48,27 +48,59 @@ export default function HomeDashboard() {
     goodThings, 
     updateMood, 
     incrementLoveTaps,
+    addGoodThing,
     isLoading
   } = useStore();
 
   const [mounted, setMounted] = useState(false);
-  const [daysTogether, setDaysTogether] = useState(428);
   const [checkedIn, setCheckedIn] = useState(false);
+  const [timeTogether, setTimeTogether] = useState({
+    days: 428,
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  // Note Modal state
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
+  const [noteTitle, setNoteTitle] = useState('');
+  const [noteDescription, setNoteDescription] = useState('');
+  const [noteTag, setNoteTag] = useState('SmallJoy');
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Dynamic Days Together Calculation
+  // Live Timer Calculation since 31st March 2025 12:53 AM
   useEffect(() => {
-    if (!coupleSettings?.anniversary_date) return;
-    const anniversary = new Date(coupleSettings.anniversary_date);
-    const today = new Date();
-    const difference = today.getTime() - anniversary.getTime();
-    const calculatedDays = Math.floor(difference / (1000 * 60 * 60 * 24));
-    if (calculatedDays > 0) {
-      setDaysTogether(calculatedDays);
+    let startDateTime = new Date('2025-03-31T00:53:00+05:30'); // Default 31st March 2025, 12:53 AM IST
+    
+    if (coupleSettings?.anniversary_date) {
+      const customDate = coupleSettings.anniversary_date;
+      if (customDate === '2025-04-01' || customDate === '2025-03-31') {
+        startDateTime = new Date('2025-03-31T00:53:00+05:30');
+      } else {
+        startDateTime = new Date(`${customDate}T00:53:00`);
+      }
     }
+
+    const updateCounter = () => {
+      const now = new Date();
+      const diffMs = now.getTime() - startDateTime.getTime();
+      
+      if (diffMs > 0) {
+        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+        
+        setTimeTogether({ days, hours, minutes, seconds });
+      }
+    };
+
+    updateCounter();
+    const interval = setInterval(updateCounter, 1000);
+    return () => clearInterval(interval);
   }, [coupleSettings?.anniversary_date]);
 
   // Find partner's mood & user's mood
@@ -122,11 +154,34 @@ export default function HomeDashboard() {
           <span className="material-symbols-outlined absolute top-1/2 -right-4 text-secondary/30 text-3xl doodle-sparkle">auto_awesome</span>
           
           <p className="font-patrick text-lg text-primary uppercase tracking-widest mb-2">Journey of Us</p>
-          <div className="flex items-baseline gap-2 mb-2 select-none">
-            <span className="font-gloria text-[72px] md:text-[100px] text-primary leading-none counter-pop">
-              {daysTogether}
-            </span>
-            <span className="font-patrick text-xl text-on-surface-variant">days</span>
+          <div className="flex flex-wrap justify-center items-center gap-3 sm:gap-5 mb-4 select-none font-gloria text-primary">
+            <div className="flex flex-col items-center">
+              <span className="text-[52px] sm:text-[72px] md:text-[80px] leading-none counter-pop min-w-[70px] sm:min-w-[100px]">
+                {timeTogether.days}
+              </span>
+              <span className="font-patrick text-xs sm:text-sm text-on-surface-variant lowercase">days</span>
+            </div>
+            <span className="text-3xl sm:text-5xl self-start mt-2 sm:mt-4">:</span>
+            <div className="flex flex-col items-center">
+              <span className="text-[52px] sm:text-[72px] md:text-[80px] leading-none counter-pop min-w-[50px] sm:min-w-[70px]">
+                {String(timeTogether.hours).padStart(2, '0')}
+              </span>
+              <span className="font-patrick text-xs sm:text-sm text-on-surface-variant lowercase">hours</span>
+            </div>
+            <span className="text-3xl sm:text-5xl self-start mt-2 sm:mt-4">:</span>
+            <div className="flex flex-col items-center">
+              <span className="text-[52px] sm:text-[72px] md:text-[80px] leading-none counter-pop min-w-[50px] sm:min-w-[70px]">
+                {String(timeTogether.minutes).padStart(2, '0')}
+              </span>
+              <span className="font-patrick text-xs sm:text-sm text-on-surface-variant lowercase">mins</span>
+            </div>
+            <span className="text-3xl sm:text-5xl self-start mt-2 sm:mt-4">:</span>
+            <div className="flex flex-col items-center">
+              <span className="text-[52px] sm:text-[72px] md:text-[80px] leading-none counter-pop min-w-[50px] sm:min-w-[70px] text-secondary">
+                {String(timeTogether.seconds).padStart(2, '0')}
+              </span>
+              <span className="font-patrick text-xs sm:text-sm text-on-surface-variant lowercase">secs</span>
+            </div>
           </div>
           <p className="font-patrick text-lg text-on-surface-variant italic">
             &quot;Every second with you is a gift.&quot;
@@ -147,12 +202,16 @@ export default function HomeDashboard() {
               </span>
               {checkedIn ? 'Checked In!' : 'Daily Check-in'}
             </button>
-            <Link href="/good-things" className="flex">
-              <button className="sketchy-border bg-white text-primary px-6 py-3 font-patrick text-lg flex items-center justify-center gap-2 active:translate-y-1 transition-all hover:scale-[1.02] w-full">
-                <span className="material-symbols-outlined">edit_note</span>
-                Write a Note
-              </button>
-            </Link>
+            <button 
+              onClick={(e) => {
+                triggerSparkles(e.clientX, e.clientY, 'tapper');
+                setIsNoteModalOpen(true);
+              }}
+              className="sketchy-border bg-white text-primary px-6 py-3 font-patrick text-lg flex items-center justify-center gap-2 active:translate-y-1 transition-all hover:scale-[1.02] w-full sm:w-auto"
+            >
+              <span className="material-symbols-outlined">edit_note</span>
+              Write a Note
+            </button>
           </div>
         </div>
       </section>
@@ -312,6 +371,109 @@ export default function HomeDashboard() {
           favorite
         </span>
       </button>
+
+      {/* WRITE A NOTE MODAL */}
+      {isNoteModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="taped-paper sketchy-border p-6 md:p-8 max-w-lg w-full relative bg-white transition-all duration-300 transform scale-100 animate-scaleUp">
+            <button 
+              onClick={() => setIsNoteModalOpen(false)}
+              className="absolute top-4 right-4 text-outline hover:text-primary transition-colors text-2xl font-bold font-patrick"
+              aria-label="Close modal"
+            >
+              ✕
+            </button>
+            
+            <h3 className="font-gloria text-2xl text-primary mb-4 flex items-center gap-2">
+              <span>Write a Sweet Note 💌</span>
+            </h3>
+            
+            <form 
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!noteTitle.trim()) return;
+
+                const rect = (e.target as HTMLElement).getBoundingClientRect();
+                triggerSparkles(rect.left + rect.width / 2, rect.top + rect.height / 2, 'good_things');
+
+                const now = new Date();
+                const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+                addGoodThing({
+                  title: noteTitle.trim(),
+                  description: noteDescription.trim() || 'Logged as a sweet memory.',
+                  time: timeStr,
+                  tags: [noteTag],
+                  image_url: null,
+                });
+
+                // Clear fields
+                setNoteTitle('');
+                setNoteDescription('');
+                setNoteTag('SmallJoy');
+                setIsNoteModalOpen(false);
+              }}
+              className="space-y-4"
+            >
+              <div>
+                <label className="font-patrick text-lg text-primary block mb-1">Title</label>
+                <input 
+                  type="text" 
+                  value={noteTitle}
+                  onChange={(e) => setNoteTitle(e.target.value)}
+                  className="w-full h-11 px-4 doodle-border bg-surface-container-lowest font-patrick text-lg"
+                  placeholder="Give your memory a name... (e.g. Star Walk)"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="font-patrick text-lg text-primary block mb-1">Your Message / Note</label>
+                <textarea 
+                  value={noteDescription}
+                  onChange={(e) => setNoteDescription(e.target.value)}
+                  rows={4}
+                  className="w-full p-4 doodle-border bg-surface-container-lowest font-patrick text-lg resize-none relative outline-none"
+                  style={{
+                    backgroundImage: 'linear-gradient(#f1f1f1 1px, transparent 1px)',
+                    backgroundSize: '100% 28px',
+                    lineHeight: '28px',
+                    paddingTop: '6px'
+                  }}
+                  placeholder="Write your note down here..."
+                />
+              </div>
+
+              <div>
+                <label className="font-patrick text-base text-primary block mb-1">Choose Tag</label>
+                <div className="flex flex-wrap gap-2 select-none">
+                  {['SelfCare', 'WorkWin', 'SmallJoy', 'Relationship', 'Gratitude'].map((tag) => (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => setNoteTag(tag)}
+                      className={`px-3 py-1 font-patrick text-sm border-2 border-outline rounded transition-all ${
+                        noteTag === tag 
+                          ? 'bg-primary text-white scale-105 font-bold' 
+                          : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
+                      }`}
+                    >
+                      #{tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button 
+                type="submit"
+                className="sticker-btn w-full py-3 bg-primary text-white text-xl active:translate-y-1 transition-all mt-4 font-gloria"
+              >
+                Add to Scrapbook ✨
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

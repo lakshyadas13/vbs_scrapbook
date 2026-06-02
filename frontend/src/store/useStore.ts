@@ -551,18 +551,18 @@ export const useStore = create<AppState>((set, get) => ({
     const { currentUser } = get();
     if (!currentUser || !currentUser.couple_id) return;
 
-    const newThing: GoodThing = {
-      ...thing,
-      id: Math.random().toString(),
-      user_id: currentUser.id,
-      couple_id: currentUser.couple_id,
-      created_at: new Date().toISOString(),
-    };
-
-    set({ goodThings: [newThing, ...get().goodThings] });
-    setLocal('doodly_good_things', get().goodThings);
-
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured) {
+      const newThing: GoodThing = {
+        ...thing,
+        id: Math.random().toString(),
+        user_id: currentUser.id,
+        couple_id: currentUser.couple_id,
+        created_at: new Date().toISOString(),
+      };
+      set({ goodThings: [newThing, ...get().goodThings] });
+      setLocal('doodly_good_things', get().goodThings);
+      return;
+    }
 
     try {
       await supabase.from('good_things').insert({
@@ -598,19 +598,19 @@ export const useStore = create<AppState>((set, get) => ({
     const { currentUser } = get();
     if (!currentUser || !currentUser.couple_id) return;
 
-    const newOopsie: Oopsie = {
-      ...oopsie,
-      id: Math.random().toString(),
-      user_id: currentUser.id,
-      couple_id: currentUser.couple_id,
-      status: 'pending',
-      created_at: new Date().toISOString(),
-    };
-
-    set({ oopsies: [newOopsie, ...get().oopsies] });
-    setLocal('doodly_oopsies', get().oopsies);
-
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured) {
+      const newOopsie: Oopsie = {
+        ...oopsie,
+        id: Math.random().toString(),
+        user_id: currentUser.id,
+        couple_id: currentUser.couple_id,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+      };
+      set({ oopsies: [newOopsie, ...get().oopsies] });
+      setLocal('doodly_oopsies', get().oopsies);
+      return;
+    }
 
     try {
       await supabase.from('oopsies').insert({
@@ -661,17 +661,17 @@ export const useStore = create<AppState>((set, get) => ({
     const { currentUser } = get();
     if (!currentUser || !currentUser.couple_id) return;
 
-    const newPlan: Plan = {
-      ...plan,
-      id: Math.random().toString(),
-      couple_id: currentUser.couple_id,
-      created_at: new Date().toISOString(),
-    };
-
-    set({ plans: [...get().plans, newPlan].sort((a, b) => a.time.localeCompare(b.time)) });
-    setLocal('doodly_plans', get().plans);
-
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured) {
+      const newPlan: Plan = {
+        ...plan,
+        id: Math.random().toString(),
+        couple_id: currentUser.couple_id,
+        created_at: new Date().toISOString(),
+      };
+      set({ plans: [...get().plans, newPlan].sort((a, b) => a.time.localeCompare(b.time)) });
+      setLocal('doodly_plans', get().plans);
+      return;
+    }
 
     try {
       await supabase.from('plans').insert({
@@ -707,18 +707,18 @@ export const useStore = create<AppState>((set, get) => ({
     const { currentUser } = get();
     if (!currentUser || !currentUser.couple_id) return;
 
-    const newItem: ChecklistItem = {
-      id: Math.random().toString(),
-      couple_id: currentUser.couple_id,
-      task,
-      is_completed: false,
-      created_at: new Date().toISOString(),
-    };
-
-    set({ checklist: [...get().checklist, newItem] });
-    setLocal('doodly_checklist', get().checklist);
-
-    if (!isSupabaseConfigured) return;
+    if (!isSupabaseConfigured) {
+      const newItem: ChecklistItem = {
+        id: Math.random().toString(),
+        couple_id: currentUser.couple_id,
+        task,
+        is_completed: false,
+        created_at: new Date().toISOString(),
+      };
+      set({ checklist: [...get().checklist, newItem] });
+      setLocal('doodly_checklist', get().checklist);
+      return;
+    }
 
     try {
       await supabase.from('plans_checklist').insert({

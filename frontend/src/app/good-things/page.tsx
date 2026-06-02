@@ -7,13 +7,32 @@ import { triggerSparkles } from '@/utils/sparkles';
 export default function GoodThingsPage() {
   const { goodThings, addGoodThing, deleteGoodThing, currentUser, loveTaps } = useStore();
   const [inputText, setInputText] = useState('');
+  const [descriptionText, setDescriptionText] = useState('');
   const [activeTag, setActiveTag] = useState<string>('SmallJoy');
 
-  // Secret Surprise Logic
+  // Secret Surprises Milestones Logic
   const totalLoveTapsCombined = loveTaps.reduce((acc, curr) => acc + curr.count, 0);
-  const targetTaps = 100;
-  const isSurpriseUnlocked = totalLoveTapsCombined >= targetTaps;
-  const surpriseProgress = Math.min(100, Math.round((totalLoveTapsCombined / targetTaps) * 100));
+  
+  const milestones = [
+    {
+      target: 100,
+      title: 'Sweet Beginning 🍨',
+      desc: 'Keep tapping the heart to unlock a sweet treats milestone surprise.',
+      voucher: "SECRET COUPLE VOUCHER: 'One Free Late Night Ice Cream Run & Infinite Back Rubs.' Valid forever! ✨",
+    },
+    {
+      target: 500,
+      title: 'Deep Connection 🎬',
+      desc: 'Unlock this once you reach 500 total taps to claim a cozy weekend treat.',
+      voucher: "SECRET COUPLE VOUCHER: 'A Lazy Sunday Movie Marathon with home-cooked meals served by your partner.' 🍿",
+    },
+    {
+      target: 1000,
+      title: 'Infinite Love ✈️',
+      desc: 'The ultimate milestone reward at 1000 total combined love taps!',
+      voucher: "SECRET COUPLE VOUCHER: 'A Weekend Getaway trip planned and funded by the other partner + a handmade letter.' 💖",
+    }
+  ];
 
   const handleTagSelect = (tag: string) => {
     setActiveTag(tag);
@@ -32,13 +51,14 @@ export default function GoodThingsPage() {
 
     addGoodThing({
       title: inputText.trim(),
-      description: 'Logged as a daily accomplishment.',
+      description: descriptionText.trim() || 'Logged as a daily accomplishment.',
       time: timeStr,
       tags: [activeTag],
       image_url: null,
     });
 
     setInputText('');
+    setDescriptionText('');
   };
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
@@ -62,73 +82,83 @@ export default function GoodThingsPage() {
             auto_awesome
           </span>
         </div>
-        <h2 className="font-gloria text-3xl md:text-4xl text-primary mb-2">Proud of You</h2>
+        <h2 className="font-gloria text-3xl md:text-4xl text-primary mb-2">Scrapbook Notes & Surprises</h2>
         <div className="inline-block rotate-1 bg-white/60 p-4 border-2 border-outline-variant/60 rounded">
           <p className="font-patrick text-xl text-on-surface-variant max-w-lg mx-auto">
-            Every small step is a beautiful achievement. Let&apos;s celebrate all the good things you did today.
+            Every small step is a beautiful achievement. Let&apos;s celebrate all the sweet memories and milestones together.
           </p>
         </div>
       </section>
 
-      {/* Secret Surprise Box */}
-      <section className="mb-12 max-w-2xl mx-auto select-none">
-        <div className={`doodle-card p-6 md:p-8 bg-white relative transition-all duration-500 overflow-hidden ${
-          isSurpriseUnlocked ? 'border-primary shadow-lg scale-[1.02] rotate-1' : 'border-outline-variant/80 -rotate-1'
-        }`}>
-          <div className="doodle-tape"></div>
-          
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="relative">
-              {isSurpriseUnlocked ? (
-                <div className="w-24 h-24 bg-primary-container rounded-full flex items-center justify-center border-2 border-primary animate-bounce">
-                  <span className="material-symbols-outlined text-primary text-5xl">celebration</span>
-                </div>
-              ) : (
-                <div className="w-24 h-24 bg-surface-container rounded-full flex items-center justify-center border-2 border-outline-variant relative">
-                  <span className="material-symbols-outlined text-outline text-5xl">lock</span>
-                  <div className="absolute -top-1 -right-1 w-6 h-6 bg-secondary rounded-full flex items-center justify-center border border-white text-[10px] text-white font-bold">
-                    {surpriseProgress}%
-                  </div>
-                </div>
-              )}
-            </div>
+      {/* Secret Surprise Grid */}
+      <section className="mb-12 select-none">
+        <h3 className="font-gloria text-2xl text-primary text-center mb-6">Love Tapper Milestones & Surprises 🎁</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {milestones.map((m, idx) => {
+            const isUnlocked = totalLoveTapsCombined >= m.target;
+            const progress = Math.min(100, Math.round((totalLoveTapsCombined / m.target) * 100));
+            const rotDeg = idx === 0 ? '-rotate-1' : idx === 1 ? 'rotate-1' : 'rotate-[-2deg]';
 
-            <div className="flex-1 text-center md:text-left">
-              <h3 className="font-gloria text-2xl text-primary mb-2">Secret Surprise Envelope 🎁</h3>
-              
-              {isSurpriseUnlocked ? (
-                <div>
-                  <p className="font-patrick text-lg text-secondary font-bold mb-4">
-                    🎉 UNLOCKED! You achieved {totalLoveTapsCombined} love taps together! 🎉
-                  </p>
-                  <div 
-                    onClick={handleRevealSurprise}
-                    className="p-4 bg-secondary-container/40 rounded border-2 border-dashed border-secondary rotate-[-1deg] font-patrick text-xl text-on-secondary-container shadow-sm cursor-pointer hover:rotate-0 transition-transform"
-                  >
-                    🎫 <span className="font-bold">SECRET COUPLE VOUCHER:</span> &apos;One Free Late Night Ice Cream Run &amp; Infinite Back Rubs.&apos; Valid forever! ✨
+            return (
+              <div 
+                key={m.target}
+                className={`doodle-card p-6 bg-white relative transition-all duration-500 overflow-hidden flex flex-col justify-between min-h-[340px] ${rotDeg} ${
+                  isUnlocked ? 'border-primary shadow-md scale-[1.01]' : 'border-outline-variant/60'
+                }`}
+              >
+                <div className="doodle-tape"></div>
+                
+                <div className="flex flex-col items-center text-center mt-3">
+                  {isUnlocked ? (
+                    <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center border-2 border-primary mb-3 animate-bounce">
+                      <span className="material-symbols-outlined text-primary text-3xl">celebration</span>
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center border-2 border-outline-variant relative mb-3">
+                      <span className="material-symbols-outlined text-outline text-3xl">lock</span>
+                      <div className="absolute -top-1 -right-1 w-5 h-5 bg-secondary rounded-full flex items-center justify-center border border-white text-[9px] text-white font-bold">
+                        {progress}%
+                      </div>
+                    </div>
+                  )}
+                  <h4 className="font-gloria text-lg text-primary font-bold mb-1">{m.title}</h4>
+                  <span className="font-patrick text-xs text-outline bg-surface-container px-2 py-0.5 border border-outline rounded mb-3 uppercase tracking-wider">
+                    {m.target} Taps
+                  </span>
+                </div>
+
+                <div className="flex-grow flex flex-col justify-center text-center px-1">
+                  {isUnlocked ? (
+                    <div 
+                      onClick={handleRevealSurprise}
+                      className="p-3 bg-secondary-container/30 rounded border-2 border-dashed border-secondary rotate-[-1deg] font-patrick text-base text-on-secondary-container shadow-sm cursor-pointer hover:rotate-0 transition-transform leading-relaxed"
+                    >
+                      <span className="font-bold">🎫 {m.voucher}</span>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="font-patrick text-base text-on-surface-variant leading-relaxed">
+                        {m.desc}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mt-4 pt-2 border-t border-dashed border-outline-variant/50">
+                  <div className="flex justify-between items-center font-patrick text-xs text-outline mb-1">
+                    <span>Progress: {totalLoveTapsCombined} / {m.target}</span>
+                    <span>{progress}%</span>
+                  </div>
+                  <div className="w-full bg-surface-container h-2.5 border border-outline rounded-full p-0.5 overflow-hidden">
+                    <div 
+                      className="bg-primary h-full rounded-full transition-all duration-500" 
+                      style={{ width: `${progress}%` }}
+                    ></div>
                   </div>
                 </div>
-              ) : (
-                <div>
-                  <p className="font-patrick text-lg text-on-surface-variant mb-4">
-                    This envelope contains a special surprise. Keep tapping the heart together in the Tapper page to unlock it!
-                  </p>
-                  <div>
-                    <div className="flex justify-between items-center font-patrick text-sm text-outline mb-1">
-                      <span>Taps Goal: {totalLoveTapsCombined} / {targetTaps}</span>
-                      <span>{surpriseProgress}%</span>
-                    </div>
-                    <div className="w-full bg-surface-container h-3 border border-outline rounded-full p-0.5 overflow-hidden">
-                      <div 
-                        className="bg-primary h-full rounded-full transition-all duration-500" 
-                        style={{ width: `${surpriseProgress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
+            );
+          })}
         </div>
       </section>
 
@@ -137,34 +167,45 @@ export default function GoodThingsPage() {
         <div className="doodle-card p-6 md:p-8 bg-white relative">
           <div className="doodle-tape"></div>
           
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-            <div className="relative flex flex-col sm:flex-row gap-3">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <div>
+              <label className="font-patrick text-lg text-primary block mb-1">Title</label>
               <input 
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 placeholder="What's one good thing you did today?"
-                className="flex-grow h-14 px-6 border-2 border-outline rounded bg-surface-container-lowest focus:outline-none focus:border-primary font-patrick text-xl"
+                className="w-full h-12 px-4 border-2 border-outline rounded bg-surface-container-lowest focus:outline-none focus:border-primary font-patrick text-lg"
                 required
               />
-              <button 
-                type="submit"
-                className="h-14 px-6 bg-primary-container text-on-primary-container font-gloria text-lg border-2 border-outline rounded squishy flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform font-bold"
-              >
-                <span className="material-symbols-outlined text-base">edit</span>
-                <span>Add</span>
-              </button>
             </div>
             
-            <div className="flex flex-wrap gap-2 px-1 select-none">
+            <div>
+              <label className="font-patrick text-lg text-primary block mb-1">Description / Details</label>
+              <textarea 
+                value={descriptionText}
+                onChange={(e) => setDescriptionText(e.target.value)}
+                placeholder="Add more details or write a sweet note..."
+                rows={3}
+                className="w-full p-4 border-2 border-outline rounded bg-surface-container-lowest focus:outline-none focus:border-primary font-patrick text-lg resize-none relative outline-none"
+                style={{
+                  backgroundImage: 'linear-gradient(#f1f1f1 1px, transparent 1px)',
+                  backgroundSize: '100% 28px',
+                  lineHeight: '28px',
+                  paddingTop: '6px'
+                }}
+              />
+            </div>
+            
+            <div className="flex flex-wrap gap-2 px-1 select-none py-1">
               {['SelfCare', 'WorkWin', 'SmallJoy', 'Relationship', 'Gratitude'].map((tag) => (
                 <button
                   key={tag}
                   type="button"
                   onClick={() => handleTagSelect(tag)}
-                  className={`px-3 py-1 font-patrick text-base border-2 border-outline rounded transition-all ${
+                  className={`px-3 py-1 font-patrick text-sm border-2 border-outline rounded transition-all ${
                     activeTag === tag 
-                      ? 'bg-primary text-white scale-105' 
+                      ? 'bg-primary text-white scale-105 font-bold' 
                       : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
                   }`}
                 >
@@ -172,13 +213,20 @@ export default function GoodThingsPage() {
                 </button>
               ))}
             </div>
+
+            <button 
+              type="submit"
+              className="w-full h-12 bg-primary text-white font-gloria text-lg border-2 border-outline rounded squishy flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform font-bold"
+            >
+              <span className="material-symbols-outlined text-base">edit</span>
+              <span>Add to Scrapbook ✨</span>
+            </button>
           </form>
         </div>
       </section>
 
       {/* Bento Grid List of Good Things */}
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        
         {goodThings.map((thing, index) => {
           const isWide = index % 4 === 0;
           const rotationClass = index % 3 === 0 ? '-rotate-1' : index % 3 === 1 ? 'rotate-1' : 'rotate-2';
