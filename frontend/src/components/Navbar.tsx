@@ -7,8 +7,8 @@ import { useStore } from '@/store/useStore';
 import { triggerSparkles } from '@/utils/sparkles';
 import { useEffect } from 'react';
 
-const LAKSHYA_AVATAR = 'https://upload.wikimedia.org/wikipedia/en/7/70/Crayon_Shin-chan.png';
-const PARTNER_AVATAR = 'https://upload.wikimedia.org/wikipedia/en/0/05/Hello_kitty_character_portrait.png';
+const LAKSHYA_AVATAR = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%220.9em%22 font-size=%2280%22%3E🐵%3C/text%3E%3C/svg%3E';
+const PARTNER_AVATAR = 'https://i.pinimg.com/originals/a1/cc/b0/a1ccb0adcd6d01ccca2b9826f43e33ea.png';
 
 export default function Navbar() {
   const pathname = usePathname();
