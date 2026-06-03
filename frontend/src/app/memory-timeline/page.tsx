@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useStore, Memory } from '@/store/useStore';
 import { triggerSparkles } from '@/utils/sparkles';
+import { compressImage } from '@/utils/image';
 import Link from 'next/link';
 
 const PHOTO_PRESETS = [
@@ -23,6 +24,23 @@ export default function MemoryTimelinePage() {
   const [description, setDescription] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [memoryDate, setMemoryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [isCompressing, setIsCompressing] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsCompressing(true);
+    try {
+      const dataUrl = await compressImage(file);
+      setImageUrl(dataUrl);
+    } catch (err) {
+      console.error('Image compression failed:', err);
+      alert('Could not process the uploaded image. Please try a different one!');
+    } finally {
+      setIsCompressing(false);
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -181,16 +199,73 @@ export default function MemoryTimelinePage() {
             </div>
 
             <div>
-              <label className="font-patrick text-lg text-primary block mb-1">Photo Image URL</label>
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-                className="w-full h-11 px-4 doodle-border bg-surface-container-lowest font-patrick text-lg"
-                placeholder="https://images.unsplash.com/..."
-                required
-              />
-              
+              <label className="font-patrick text-lg text-primary block mb-1">Photo / Image</label>
+              <div className="flex flex-col gap-3">
+                {/* Upload Area */}
+                <div className="relative">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-outline-variant hover:border-primary/50 rounded-lg cursor-pointer bg-surface-container-lowest hover:bg-surface-container-low transition-all">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <span className="material-symbols-outlined text-4xl text-outline mb-2">upload_file</span>
+                      <p className="font-patrick text-sm text-outline">
+                        <span className="font-bold">Choose a file</span> or drag and drop
+                      </p>
+                      <p className="font-patrick text-xs text-outline-variant mt-1">PNG, JPG, GIF (Automatically optimized)</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  
+                  {isCompressing && (
+                    <div className="absolute inset-0 bg-white/70 flex flex-col items-center justify-center rounded-lg">
+                      <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <p className="font-patrick text-sm text-primary mt-2">Optimizing image...</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Preview Area */}
+                {imageUrl && (
+                  <div className="flex items-center gap-4 bg-surface-container-low p-3 rounded-lg border border-dashed border-outline-variant">
+                    <div className="w-16 h-16 relative aspect-square rounded bg-surface-container overflow-hidden flex-shrink-0">
+                      <img src={imageUrl} alt="Upload preview" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-grow min-w-0">
+                      <p className="font-patrick text-sm text-on-surface truncate">Selected Image</p>
+                      <p className="font-patrick text-xs text-outline truncate">
+                        {imageUrl.startsWith('data:') ? 'Local file uploaded' : 'Hosted Image URL'}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl('')}
+                      className="text-red-500 hover:text-red-700 font-patrick text-sm px-2 py-1 rounded"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
+
+                {/* OR divider */}
+                <div className="flex items-center my-1 select-none">
+                  <div className="flex-grow border-t border-dashed border-outline-variant/60"></div>
+                  <span className="font-patrick text-xs text-outline px-3 font-semibold">OR USE AN IMAGE URL</span>
+                  <div className="flex-grow border-t border-dashed border-outline-variant/60"></div>
+                </div>
+
+                {/* URL Input */}
+                <input
+                  type="text"
+                  value={imageUrl}
+                  onChange={(e) => setImageUrl(e.target.value)}
+                  className="w-full h-11 px-4 doodle-border bg-surface-container-lowest font-patrick text-lg"
+                  placeholder="Paste image URL here..."
+                />
+              </div>
+
               {/* Preset Shortcuts */}
               <div className="mt-2.5">
                 <span className="font-patrick text-sm text-outline block mb-1.5">No photo URL? Use one of our sweet presets:</span>
@@ -240,7 +315,9 @@ export default function MemoryTimelinePage() {
           <h3 className="font-gloria text-2xl text-slate-800 flex items-center gap-1.5">
             <span>📌 Polaroid Scrapbook Board</span>
           </h3>
-          <span className="font-patrick text-base text-outline italic">({memories.length} pinned)</span>
+          <span className="font-patrick text-base text-outline italic">
+            ({memories.length}/5 pinned{memories.length > 0 && ", swipe to see all 📸"})
+          </span>
         </div>
 
         {memories.length === 0 ? (
@@ -251,58 +328,64 @@ export default function MemoryTimelinePage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-            {memories.map((memory, index) => {
-              // Create slight wobbly rotations
-              const rotations = ['rotate-[-1.5deg]', 'rotate-[1.2deg]', 'rotate-[-0.8deg]', 'rotate-[2deg]', 'rotate-[-2.3deg]', 'rotate-[0.5deg]'];
-              const rotation = rotations[index % rotations.length];
-              
-              const isMyOwn = memory.user_id === currentUser?.id;
+          <div className="relative w-full overflow-x-auto pt-12 pb-8 px-6 scrollbar-hide">
+            {/* The Clothesline Rope */}
+            <div className="absolute top-[40px] left-0 right-0 h-[4px] clothes-rope z-0"></div>
 
-              return (
-                <div
-                  key={memory.id}
-                  className={`polaroid bg-white border border-outline-variant/40 hover:scale-[1.03] active:scale-98 transition-all duration-300 relative ${rotation} group cursor-default`}
-                >
-                  {/* Polaroid Tape overlay */}
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 w-20 h-6 bg-amber-200/40 border border-amber-300/20 rotate-[-1.5deg] z-10 shadow-sm opacity-90"></div>
-                  
-                  {/* Photo area */}
-                  <div className="relative aspect-square overflow-hidden bg-surface-container select-none">
-                    <img
-                      src={memory.image_url}
-                      alt={memory.title}
-                      className="w-full h-full object-cover"
-                      draggable="false"
-                    />
+            {/* Hanging Polaroids List */}
+            <div className="flex flex-row justify-start md:justify-center items-start gap-8 min-w-max md:min-w-0 pb-6">
+              {memories.map((memory, index) => {
+                // Create slight wobbly rotations
+                const rotations = ['rotate-[-1.5deg]', 'rotate-[1.2deg]', 'rotate-[-0.8deg]', 'rotate-[2deg]', 'rotate-[-2.3deg]', 'rotate-[0.5deg]'];
+                const rotation = rotations[index % rotations.length];
+                
+                const isMyOwn = memory.user_id === currentUser?.id;
+
+                return (
+                  <div
+                    key={memory.id}
+                    className={`polaroid bg-white border border-outline-variant/40 hover:scale-[1.03] active:scale-98 transition-all duration-300 relative ${rotation} group cursor-default w-[220px] flex-shrink-0 mt-2`}
+                  >
+                    {/* Wooden Clothespin / Peg clipping the polaroid to the rope */}
+                    <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-3.5 h-8 wood-peg z-10 shadow-sm"></div>
                     
-                    {/* Delete button (displays on hover) */}
-                    {isMyOwn && (
-                      <button
-                        onClick={(e) => handleDelete(memory.id, e)}
-                        className="absolute bottom-2 right-2 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-full w-8 h-8 flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100"
-                        title="Delete Memory"
-                      >
-                        <span className="material-symbols-outlined text-base">delete</span>
-                      </button>
-                    )}
+                    {/* Photo area */}
+                    <div className="relative aspect-square overflow-hidden bg-surface-container select-none">
+                      <img
+                        src={memory.image_url}
+                        alt={memory.title}
+                        className="w-full h-full object-cover"
+                        draggable="false"
+                      />
+                      
+                      {/* Delete button (displays on hover) */}
+                      {isMyOwn && (
+                        <button
+                          onClick={(e) => handleDelete(memory.id, e)}
+                          className="absolute bottom-2 right-2 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-full w-8 h-8 flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100"
+                          title="Delete Memory"
+                        >
+                          <span className="material-symbols-outlined text-base">delete</span>
+                        </button>
+                      )}
+                    </div>
+                    
+                    {/* Label area */}
+                    <div className="p-4 pt-3 text-center">
+                      <span className="font-patrick text-xs text-outline block mb-1">
+                        {new Date(memory.memory_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                      </span>
+                      <h4 className="font-gloria text-base text-on-surface line-clamp-1">{memory.title}</h4>
+                      {memory.description && (
+                        <p className="font-patrick text-sm text-on-surface-variant line-clamp-2 mt-1 italic leading-tight">
+                          &ldquo;{memory.description}&rdquo;
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  
-                  {/* Label area */}
-                  <div className="p-4 pt-3 text-center">
-                    <span className="font-patrick text-xs text-outline block mb-1">
-                      {new Date(memory.memory_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                    </span>
-                    <h4 className="font-gloria text-base text-on-surface line-clamp-1">{memory.title}</h4>
-                    {memory.description && (
-                      <p className="font-patrick text-sm text-on-surface-variant line-clamp-2 mt-1 italic leading-tight">
-                        &ldquo;{memory.description}&rdquo;
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
       </section>

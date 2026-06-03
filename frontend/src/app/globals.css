@@ -364,3 +364,54 @@ body {
   0%, 100% { transform: translateY(0) rotate(0deg); }
   50% { transform: translateY(-5px) rotate(2deg); }
 }
+
+/* Clothesline Clothes-peg styling */
+.clothes-rope {
+  background: repeating-linear-gradient(
+    45deg,
+    #8b5a2b,
+    #8b5a2b 8px,
+    #a0522d 8px,
+    #a0522d 16px
+  );
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+/* Wood grain texture peg */
+.wood-peg {
+  background: linear-gradient(to bottom, #e3dac9 0%, #d7ccc8 25%, #b0bec5 50%, #8d6e63 100%);
+  border: 1px solid #705850;
+  border-radius: 2px;
+}
+
+.wood-peg::before {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 1px;
+  right: 1px;
+  height: 2px;
+  background-color: #4e342e; /* peg clamp wire spring */
+  box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+}
+
+.wood-peg::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background-color: #5d4037; /* vertical peg slit */
+  opacity: 0.5;
+}
+
+/* Custom scrollbar styling for mobile clothesline rope view */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}

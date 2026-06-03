@@ -878,21 +878,65 @@ export const useStore = create<AppState>((set, get) => ({
         couple_id: currentUser.couple_id,
         created_at: new Date().toISOString(),
       };
-      const updated = [newMemory, ...get().memories].sort((a, b) => b.memory_date.localeCompare(a.memory_date));
-      set({ memories: updated });
-      setLocal('doodly_memories', updated);
+      const allMemories = [newMemory, ...get().memories];
+      const sortedByCreated = [...allMemories].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      const trimmed = sortedByCreated.slice(0, 5);
+      trimmed.sort((a, b) => b.memory_date.localeCompare(a.memory_date));
+      
+      set({ memories: trimmed });
+      setLocal('doodly_memories', trimmed);
       return;
     }
 
     try {
-      await supabase.from('memories').insert({
-        couple_id: currentUser.couple_id,
-        user_id: currentUser.id,
-        title: memory.title,
-        description: memory.description,
-        image_url: memory.image_url,
-        memory_date: memory.memory_date,
-      });
+      const { data: existing, error: fetchErr } = await supabase
+        .from('memories')
+        .select('id, created_at')
+        .eq('couple_id', currentUser.couple_id)
+        .order('created_at', { ascending: true });
+
+      if (fetchErr) throw fetchErr;
+
+      if (existing && existing.length >= 5) {
+        const numToDelete = existing.length - 5 + 1;
+        const idsToDelete = existing.slice(0, numToDelete).map(m => m.id);
+        const { error: deleteErr } = await supabase
+          .from('memories')
+          .delete()
+          .in('id', idsToDelete);
+        
+        if (deleteErr) throw deleteErr;
+        
+        set({
+          memories: get().memories.filter(m => !idsToDelete.includes(m.id))
+        });
+      }
+
+      const { data: inserted, error: insertErr } = await supabase
+        .from('memories')
+        .insert({
+          couple_id: currentUser.couple_id,
+          user_id: currentUser.id,
+          title: memory.title,
+          description: memory.description,
+          image_url: memory.image_url,
+          memory_date: memory.memory_date,
+        })
+        .select();
+
+      if (insertErr) throw insertErr;
+
+      if (inserted && inserted.length > 0) {
+        const newMemory = inserted[0] as Memory;
+        const exists = get().memories.some(m => m.id === newMemory.id);
+        if (!exists) {
+          const updated = [newMemory, ...get().memories].sort((a, b) => b.memory_date.localeCompare(a.memory_date));
+          set({ memories: updated });
+          setLocal('doodly_memories', updated);
+        }
+      }
     } catch (err: any) {
       console.error('Error saving memory:', err);
     }
