@@ -51,7 +51,7 @@ export default function GoodThingsPage() {
 
   // Secret Surprises Milestones Logic
   const totalLoveTapsCombined = loveTaps.reduce((acc, curr) => acc + curr.count, 0);
-  
+
   const milestones = [
     {
       target: 100,
@@ -140,14 +140,13 @@ export default function GoodThingsPage() {
             const rotDeg = idx === 0 ? '-rotate-1' : idx === 1 ? 'rotate-1' : 'rotate-[-2deg]';
 
             return (
-              <div 
+              <div
                 key={m.target}
-                className={`doodle-card p-6 bg-white relative transition-all duration-500 overflow-hidden flex flex-col justify-between min-h-[340px] ${rotDeg} ${
-                  isUnlocked ? 'border-primary shadow-md scale-[1.01]' : 'border-outline-variant/60'
-                }`}
+                className={`doodle-card p-6 bg-white relative transition-all duration-500 overflow-hidden flex flex-col justify-between min-h-[340px] ${rotDeg} ${isUnlocked ? 'border-primary shadow-md scale-[1.01]' : 'border-outline-variant/60'
+                  }`}
               >
                 <div className="doodle-tape"></div>
-                
+
                 <div className="flex flex-col items-center text-center mt-3">
                   {isUnlocked ? (
                     <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center border-2 border-primary mb-3 animate-bounce">
@@ -169,7 +168,7 @@ export default function GoodThingsPage() {
 
                 <div className="flex-grow flex flex-col justify-center text-center px-1">
                   {isUnlocked ? (
-                    <div 
+                    <div
                       onClick={handleRevealSurprise}
                       className="p-3 bg-secondary-container/30 rounded border-2 border-dashed border-secondary rotate-[-1deg] font-patrick text-base text-on-secondary-container shadow-sm cursor-pointer hover:rotate-0 transition-transform leading-relaxed"
                     >
@@ -190,8 +189,8 @@ export default function GoodThingsPage() {
                     <span>{progress}%</span>
                   </div>
                   <div className="w-full bg-surface-container h-2.5 border border-outline rounded-full p-0.5 overflow-hidden">
-                    <div 
-                      className="bg-primary h-full rounded-full transition-all duration-500" 
+                    <div
+                      className="bg-primary h-full rounded-full transition-all duration-500"
                       style={{ width: `${progress}%` }}
                     ></div>
                   </div>
@@ -206,11 +205,11 @@ export default function GoodThingsPage() {
       <section className="mb-12 max-w-2xl mx-auto">
         <div className="doodle-card p-6 md:p-8 bg-white relative">
           <div className="doodle-tape"></div>
-          
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div>
               <label className="font-patrick text-lg text-primary block mb-1">Title</label>
-              <input 
+              <input
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
@@ -219,10 +218,10 @@ export default function GoodThingsPage() {
                 required
               />
             </div>
-            
+
             <div>
               <label className="font-patrick text-lg text-primary block mb-1">Description / Details</label>
-              <textarea 
+              <textarea
                 value={descriptionText}
                 onChange={(e) => setDescriptionText(e.target.value)}
                 placeholder="Add more details or write a sweet note..."
@@ -257,7 +256,7 @@ export default function GoodThingsPage() {
                       className="hidden"
                     />
                   </label>
-                  
+
                   {isCompressing && (
                     <div className="absolute inset-0 bg-white/70 flex flex-col items-center justify-center rounded-lg">
                       <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
@@ -287,25 +286,24 @@ export default function GoodThingsPage() {
                 )}
               </div>
             </div>
-            
+
             <div className="flex flex-wrap gap-2 px-1 select-none py-1">
               {['SelfCare', 'WorkWin', 'SmallJoy', 'Relationship', 'Gratitude'].map((tag) => (
                 <button
                   key={tag}
                   type="button"
                   onClick={() => handleTagSelect(tag)}
-                  className={`px-3 py-1 font-patrick text-sm border-2 border-outline rounded transition-all ${
-                    activeTag === tag 
-                      ? 'bg-primary text-white scale-105 font-bold' 
+                  className={`px-3 py-1 font-patrick text-sm border-2 border-outline rounded transition-all ${activeTag === tag
+                      ? 'bg-primary text-white scale-105 font-bold'
                       : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
-                  }`}
+                    }`}
                 >
                   #{tag}
                 </button>
               ))}
             </div>
 
-            <button 
+            <button
               type="submit"
               className="w-full h-12 bg-primary text-white font-gloria text-lg border-2 border-outline rounded squishy flex items-center justify-center gap-2 hover:scale-[1.01] transition-transform font-bold"
             >
@@ -324,7 +322,7 @@ export default function GoodThingsPage() {
           const pinOrTape = index % 2 === 0 ? <div className="doodle-pin"></div> : <div className="doodle-tape"></div>;
 
           return (
-            <div 
+            <div
               key={thing.id}
               className={`doodle-card p-6 md:p-8 hover:-translate-y-1 transition-all duration-300 group bg-white flex flex-col justify-between ${
                 isWide ? 'md:col-span-2' : ''
@@ -334,11 +332,11 @@ export default function GoodThingsPage() {
 
               {/* Postcard Stamp Image (Top Right) */}
               {thing.image_url && (
-                <div className="absolute top-8 right-6 z-10 w-16 h-20 postcard-stamp rotate-[4deg] hover:rotate-0 hover:scale-105 transition-all duration-300 pointer-events-auto">
-                  <img 
-                    src={thing.image_url} 
-                    alt="Stamp" 
-                    className="w-full h-full object-cover rounded-[1px]" 
+                <div className="absolute top-8 right-6 z-10 w-[108px] h-[144px] postcard-stamp rotate-[4deg] hover:rotate-0 hover:scale-105 transition-all duration-300 pointer-events-auto">
+                  <img
+                    src={thing.image_url}
+                    alt="Stamp"
+                    className="w-full h-full object-cover rounded-[1px]"
                   />
                   {/* Vintage cancellation postmark stamp */}
                   <div className="absolute -top-3 -left-3 w-10 h-10 border border-dashed border-slate-700/35 rounded-full flex items-center justify-center -rotate-12 pointer-events-none select-none text-[6px] font-patrick text-slate-700/35 font-bold leading-none bg-white/20 backdrop-blur-[0.5px]">
@@ -349,7 +347,7 @@ export default function GoodThingsPage() {
                   </div>
                 </div>
               )}
-              
+
               <div className="mt-4 flex flex-col justify-between h-full">
                 <div>
                   <div className="flex justify-between items-center mb-4 text-outline font-patrick text-sm select-none">
@@ -371,11 +369,11 @@ export default function GoodThingsPage() {
                       )}
                     </div>
                   </div>
-                  <h3 className={`font-gloria text-xl md:text-2xl text-primary mb-3 leading-snug ${thing.image_url ? 'pr-20' : ''}`}>
+                  <h3 className={`font-gloria text-xl md:text-2xl text-primary mb-3 leading-snug ${thing.image_url ? 'pr-[140px]' : ''}`}>
                     {thing.title}
                   </h3>
                   {thing.description && thing.description !== 'Logged as a daily accomplishment.' && (
-                    <p className={`font-patrick text-lg text-on-surface-variant mb-4 ${thing.image_url ? 'pr-20' : ''}`}>
+                    <p className={`font-patrick text-lg text-on-surface-variant mb-4 ${thing.image_url ? 'pr-[140px]' : ''}`}>
                       {thing.description}
                     </p>
                   )}
