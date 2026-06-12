@@ -368,8 +368,8 @@ export default function LoveLettersPage() {
 
       {/* LETTER READ DIALOG */}
       {selectedLetter && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-xl animate-scaleUp transform rotate-[-0.5deg]">
+        <div className="fixed inset-0 z-50 flex justify-center items-start overflow-y-auto bg-black/50 backdrop-blur-sm p-4">
+          <div className="relative w-full max-w-xl my-auto animate-scaleUp transform rotate-[-0.5deg]">
             {/* Sealed/Handwritten sliding-out letter wrapper */}
             <div className="sketchy-border bg-[#FCF8EE] p-8 shadow-2xl relative border-2 border-amber-900/30">
               {/* Notebook binding dots */}

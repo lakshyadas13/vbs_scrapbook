@@ -328,63 +328,65 @@ export default function MemoryTimelinePage() {
             </p>
           </div>
         ) : (
-          <div className="relative w-full overflow-x-auto pt-12 pb-8 px-6 scrollbar-hide">
-            {/* The Clothesline Rope */}
-            <div className="absolute top-[40px] left-0 right-0 h-[4px] clothes-rope z-0"></div>
+          <div className="w-full overflow-x-auto pt-12 pb-8 px-6 scrollbar-hide">
+            <div className="relative min-w-full inline-block">
+              {/* The Clothesline Rope */}
+              <div className="absolute top-[40px] left-0 right-0 h-[4px] clothes-rope z-0"></div>
 
-            {/* Hanging Polaroids List */}
-            <div className="flex flex-row justify-start md:justify-center items-start gap-8 min-w-max md:min-w-0 pb-6">
-              {memories.map((memory, index) => {
-                // Create slight wobbly rotations
-                const rotations = ['rotate-[-1.5deg]', 'rotate-[1.2deg]', 'rotate-[-0.8deg]', 'rotate-[2deg]', 'rotate-[-2.3deg]', 'rotate-[0.5deg]'];
-                const rotation = rotations[index % rotations.length];
-                
-                const isMyOwn = memory.user_id === currentUser?.id;
+              {/* Hanging Polaroids List */}
+              <div className="flex flex-row justify-start md:justify-center items-start gap-8 min-w-max md:min-w-0 pb-6">
+                {memories.map((memory, index) => {
+                  // Create slight wobbly rotations
+                  const rotations = ['rotate-[-1.5deg]', 'rotate-[1.2deg]', 'rotate-[-0.8deg]', 'rotate-[2deg]', 'rotate-[-2.3deg]', 'rotate-[0.5deg]'];
+                  const rotation = rotations[index % rotations.length];
+                  
+                  const isMyOwn = memory.user_id === currentUser?.id;
 
-                return (
-                  <div
-                    key={memory.id}
-                    className={`polaroid bg-white border border-outline-variant/40 hover:scale-[1.03] active:scale-98 transition-all duration-300 relative ${rotation} group cursor-default w-[220px] flex-shrink-0 mt-2`}
-                  >
-                    {/* Wooden Clothespin / Peg clipping the polaroid to the rope */}
-                    <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-3.5 h-8 wood-peg z-10 shadow-sm"></div>
-                    
-                    {/* Photo area */}
-                    <div className="relative aspect-square overflow-hidden bg-surface-container select-none">
-                      <img
-                        src={memory.image_url}
-                        alt={memory.title}
-                        className="w-full h-full object-cover"
-                        draggable="false"
-                      />
+                  return (
+                    <div
+                      key={memory.id}
+                      className={`polaroid bg-white border border-outline-variant/40 hover:scale-[1.03] active:scale-98 transition-all duration-300 relative ${rotation} group cursor-default w-[220px] flex-shrink-0 mt-2`}
+                    >
+                      {/* Wooden Clothespin / Peg clipping the polaroid to the rope */}
+                      <div className="absolute -top-5 left-1/2 transform -translate-x-1/2 w-3.5 h-8 wood-peg z-10 shadow-sm"></div>
                       
-                      {/* Delete button (displays on hover) */}
-                      {isMyOwn && (
-                        <button
-                          onClick={(e) => handleDelete(memory.id, e)}
-                          className="absolute bottom-2 right-2 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-full w-8 h-8 flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100"
-                          title="Delete Memory"
-                        >
-                          <span className="material-symbols-outlined text-base">delete</span>
-                        </button>
-                      )}
+                      {/* Photo area */}
+                      <div className="relative aspect-square overflow-hidden bg-surface-container select-none">
+                        <img
+                          src={memory.image_url}
+                          alt={memory.title}
+                          className="w-full h-full object-cover"
+                          draggable="false"
+                        />
+                        
+                        {/* Delete button (displays on hover) */}
+                        {isMyOwn && (
+                          <button
+                            onClick={(e) => handleDelete(memory.id, e)}
+                            className="absolute bottom-2 right-2 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-full w-8 h-8 flex items-center justify-center shadow-md transition-all opacity-0 group-hover:opacity-100"
+                            title="Delete Memory"
+                          >
+                            <span className="material-symbols-outlined text-base">delete</span>
+                          </button>
+                        )}
+                      </div>
+                      
+                      {/* Label area */}
+                      <div className="p-4 pt-3 text-center">
+                        <span className="font-patrick text-xs text-outline block mb-1">
+                          {new Date(memory.memory_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
+                        </span>
+                        <h4 className="font-gloria text-base text-on-surface line-clamp-1">{memory.title}</h4>
+                        {memory.description && (
+                          <p className="font-patrick text-sm text-on-surface-variant line-clamp-2 mt-1 italic leading-tight">
+                            &ldquo;{memory.description}&rdquo;
+                          </p>
+                        )}
+                      </div>
                     </div>
-                    
-                    {/* Label area */}
-                    <div className="p-4 pt-3 text-center">
-                      <span className="font-patrick text-xs text-outline block mb-1">
-                        {new Date(memory.memory_date).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}
-                      </span>
-                      <h4 className="font-gloria text-base text-on-surface line-clamp-1">{memory.title}</h4>
-                      {memory.description && (
-                        <p className="font-patrick text-sm text-on-surface-variant line-clamp-2 mt-1 italic leading-tight">
-                          &ldquo;{memory.description}&rdquo;
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
           </div>
         )}

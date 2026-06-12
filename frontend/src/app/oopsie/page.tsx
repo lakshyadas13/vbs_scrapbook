@@ -5,12 +5,20 @@ import { useStore, Oopsie } from '@/store/useStore';
 import { triggerSparkles } from '@/utils/sparkles';
 
 export default function OopsieCornerPage() {
-  const { oopsies, addOopsie, promiseOopsie, deleteOopsie, currentUser } = useStore();
+  const { oopsies, addOopsie, promiseOopsie, deleteOopsie, currentUser, loveTaps } = useStore();
   const [isLogging, setIsLogging] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [tagsStr, setTagsStr] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+  const [oopsieOwner, setOopsieOwner] = useState<'me' | 'partner'>('me');
+
+  const getOopsieLabel = (oopsUserId: string) => {
+    if (oopsUserId === currentUser?.id) {
+      return "oopsie by me";
+    }
+    return currentUser?.role === 'lakshya' ? "oopsie by her" : "oopsie by him";
+  };
 
   // Stats calculation
   const totalOopsies = oopsies.length;
@@ -35,18 +43,22 @@ export default function OopsieCornerPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim()) return;
+    if (!title.trim() || !currentUser) return;
 
     const tags = tagsStr
       .split(',')
       .map(t => t.trim())
       .filter(t => t.length > 0);
 
+    const partnerTap = loveTaps.find(t => t.user_id !== currentUser.id);
+    const partnerId = partnerTap ? partnerTap.user_id : '11111111-1111-1111-1111-111111111111';
+
     addOopsie({
       title,
       description,
       tags,
       image_url: imageUrl.trim() || null,
+      user_id: oopsieOwner === 'me' ? currentUser.id : partnerId,
     });
 
     // Reset form
@@ -54,6 +66,7 @@ export default function OopsieCornerPage() {
     setDescription('');
     setTagsStr('');
     setImageUrl('');
+    setOopsieOwner('me');
     setIsLogging(false);
 
     // Trigger success sparkles
@@ -113,6 +126,33 @@ export default function OopsieCornerPage() {
                 placeholder="Write a sweet note about what happened..."
                 className="w-full p-2.5 border-2 border-outline-variant/60 rounded focus:border-primary font-patrick text-lg min-h-[100px]"
               />
+            </div>
+            <div>
+              <label className="font-patrick text-base text-primary block mb-1.5">Whose oopsie is this?</label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setOopsieOwner('me')}
+                  className={`sketchy-border px-5 py-2 font-patrick text-lg transition-all ${
+                    oopsieOwner === 'me'
+                      ? 'bg-primary text-white scale-102 font-bold'
+                      : 'bg-white text-on-surface hover:bg-surface-container'
+                  }`}
+                >
+                  🙋‍♂️ Mine (Me)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOopsieOwner('partner')}
+                  className={`sketchy-border px-5 py-2 font-patrick text-lg transition-all ${
+                    oopsieOwner === 'partner'
+                      ? 'bg-secondary text-white scale-102 font-bold'
+                      : 'bg-white text-on-surface hover:bg-surface-container'
+                  }`}
+                >
+                  {currentUser?.role === 'lakshya' ? '🙋‍♀️ Hers (Vishakha)' : '🙋‍♂️ His (Lakshya)'}
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
@@ -180,8 +220,13 @@ export default function OopsieCornerPage() {
           return (
             <div key={oops.id} className="sketch-card flex flex-col bg-white overflow-hidden relative min-h-[320px]">
               <div className="tape"></div>
+
+              {/* Chalkboard Badge */}
+              <div className="absolute top-3 left-3 chalkboard-badge px-2.5 py-1 z-10 rotate-[-3deg] text-xs font-bold uppercase tracking-wider">
+                {getOopsieLabel(oops.user_id)}
+              </div>
               
-              {currentUser && (oops.user_id === currentUser.id || oops.user_id === '00000000-0000-0000-0000-000000000000') && (
+              {currentUser && (
                 <button 
                   onClick={(e) => handleDeleteClick(oops.id, e)}
                   className="absolute top-2 right-2 text-red-400 hover:text-red-600 transition-colors p-1 z-10"

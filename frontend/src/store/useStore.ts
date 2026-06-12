@@ -125,7 +125,7 @@ interface AppState {
   // CRUD Operations
   addGoodThing: (thing: Omit<GoodThing, 'id' | 'user_id' | 'couple_id' | 'created_at'>) => Promise<void>;
   deleteGoodThing: (id: string) => Promise<void>;
-  addOopsie: (oopsie: Omit<Oopsie, 'id' | 'user_id' | 'couple_id' | 'status' | 'created_at'>) => Promise<void>;
+  addOopsie: (oopsie: Omit<Oopsie, 'id' | 'couple_id' | 'status' | 'created_at'>) => Promise<void>;
   promiseOopsie: (id: string) => Promise<void>;
   deleteOopsie: (id: string) => Promise<void>;
   addPlan: (plan: Omit<Plan, 'id' | 'couple_id' | 'created_at'>) => Promise<void>;
@@ -657,11 +657,13 @@ export const useStore = create<AppState>((set, get) => ({
     const { currentUser } = get();
     if (!currentUser || !currentUser.couple_id) return;
 
+    const oopsieUserId = oopsie.user_id || currentUser.id;
+
     if (!isSupabaseConfigured) {
       const newOopsie: Oopsie = {
         ...oopsie,
+        user_id: oopsieUserId,
         id: Math.random().toString(),
-        user_id: currentUser.id,
         couple_id: currentUser.couple_id,
         status: 'pending',
         created_at: new Date().toISOString(),
@@ -674,7 +676,7 @@ export const useStore = create<AppState>((set, get) => ({
     try {
       await supabase.from('oopsies').insert({
         couple_id: currentUser.couple_id,
-        user_id: currentUser.id,
+        user_id: oopsieUserId,
         title: oopsie.title,
         description: oopsie.description,
         tags: oopsie.tags,

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Quicksand, Gloria_Hallelujah, Patrick_Hand } from 'next/font/google';
+import { Quicksand, Gloria_Hallelujah, Patrick_Hand, Cabin_Sketch } from 'next/font/google';
 import './globals.css';
 import Navbar from '@/components/Navbar';
 import AuthWrapper from '@/components/AuthWrapper';
@@ -22,6 +22,13 @@ const patrick = Patrick_Hand({
   subsets: ['latin'],
   variable: '--font-patrick',
   weight: ['400'],
+  display: 'swap',
+});
+
+const cabinSketch = Cabin_Sketch({
+  subsets: ['latin'],
+  variable: '--font-cabin-sketch',
+  weight: ['400', '700'],
   display: 'swap',
 });
 
@@ -49,7 +56,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className={`${quicksand.variable} ${gloria.variable} ${patrick.variable} font-quicksand text-on-surface bg-background min-h-screen pb-24 md:pb-8`}>
+      <body className={`${quicksand.variable} ${gloria.variable} ${patrick.variable} ${cabinSketch.variable} font-quicksand text-on-surface bg-background min-h-screen pb-24 md:pb-8`}>
         <AuthWrapper>
           <Navbar />
           {children}
