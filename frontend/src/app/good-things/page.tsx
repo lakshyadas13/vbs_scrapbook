@@ -3,12 +3,51 @@
 import { useState } from 'react';
 import { useStore, GoodThing } from '@/store/useStore';
 import { triggerSparkles } from '@/utils/sparkles';
+import { compressImage } from '@/utils/image';
 
 export default function GoodThingsPage() {
-  const { goodThings, addGoodThing, deleteGoodThing, currentUser, loveTaps } = useStore();
+  const { goodThings, addGoodThing, deleteGoodThing, currentUser, loveTaps, coupleSettings } = useStore();
   const [inputText, setInputText] = useState('');
   const [descriptionText, setDescriptionText] = useState('');
   const [activeTag, setActiveTag] = useState<string>('SmallJoy');
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isCompressing, setIsCompressing] = useState(false);
+
+  // Helper to determine who wrote the note
+  const getAuthorName = (noteUserId: string) => {
+    if (!currentUser) return 'Someone';
+
+    const MOCK_ID = '00000000-0000-0000-0000-000000000000';
+    const isMe = noteUserId === currentUser.id ||
+      (currentUser.id === MOCK_ID && noteUserId === MOCK_ID) ||
+      (currentUser.role === 'partner' && noteUserId === 'partner');
+
+    if (isMe) {
+      return currentUser.display_name || 'Me';
+    } else {
+      if (currentUser.role === 'lakshya') {
+        return coupleSettings?.partner2_name || 'Vishakha';
+      } else {
+        return coupleSettings?.partner1_name || 'Lakshya';
+      }
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsCompressing(true);
+    try {
+      const dataUrl = await compressImage(file);
+      setImageUrl(dataUrl);
+    } catch (err) {
+      console.error('Image compression failed:', err);
+      alert('Could not process the uploaded image. Please try a different one!');
+    } finally {
+      setIsCompressing(false);
+    }
+  };
 
   // Secret Surprises Milestones Logic
   const totalLoveTapsCombined = loveTaps.reduce((acc, curr) => acc + curr.count, 0);
@@ -54,11 +93,12 @@ export default function GoodThingsPage() {
       description: descriptionText.trim() || 'Logged as a daily accomplishment.',
       time: timeStr,
       tags: [activeTag],
-      image_url: null,
+      image_url: imageUrl,
     });
 
     setInputText('');
     setDescriptionText('');
+    setImageUrl(null);
   };
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
@@ -196,6 +236,57 @@ export default function GoodThingsPage() {
                 }}
               />
             </div>
+
+            <div>
+              <label className="font-patrick text-lg text-primary block mb-1">Add a Photo / Stamp (Optional)</label>
+              <div className="flex flex-col gap-3">
+                {/* Upload Area */}
+                <div className="relative">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-outline-variant hover:border-primary/50 rounded-lg cursor-pointer bg-surface-container-lowest hover:bg-surface-container-low transition-all">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <span className="material-symbols-outlined text-4xl text-outline mb-2">upload_file</span>
+                      <p className="font-patrick text-sm text-outline">
+                        <span className="font-bold">Choose a file</span> or drag and drop
+                      </p>
+                      <p className="font-patrick text-xs text-outline-variant mt-1">PNG, JPG, GIF (Automatically optimized)</p>
+                    </div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                  
+                  {isCompressing && (
+                    <div className="absolute inset-0 bg-white/70 flex flex-col items-center justify-center rounded-lg">
+                      <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin"></div>
+                      <p className="font-patrick text-sm text-primary mt-2">Optimizing image...</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Preview Area */}
+                {imageUrl && (
+                  <div className="flex items-center gap-4 bg-surface-container-low p-3 rounded-lg border border-dashed border-outline-variant">
+                    <div className="w-16 h-16 relative aspect-square rounded bg-surface-container overflow-hidden flex-shrink-0">
+                      <img src={imageUrl} alt="Upload preview" className="w-full h-full object-cover" />
+                    </div>
+                    <div className="flex-grow min-w-0">
+                      <p className="font-patrick text-sm text-on-surface truncate">Selected Photo</p>
+                      <p className="font-patrick text-xs text-outline truncate">Local file uploaded & optimized</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setImageUrl(null)}
+                      className="text-red-500 hover:text-red-700 font-patrick text-sm px-2 py-1 rounded hover:bg-red-50 transition-colors"
+                    >
+                      Clear
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
             
             <div className="flex flex-wrap gap-2 px-1 select-none py-1">
               {['SelfCare', 'WorkWin', 'SmallJoy', 'Relationship', 'Gratitude'].map((tag) => (
@@ -240,6 +331,24 @@ export default function GoodThingsPage() {
               } ${rotationClass}`}
             >
               {pinOrTape}
+
+              {/* Postcard Stamp Image (Top Right) */}
+              {thing.image_url && (
+                <div className="absolute top-8 right-6 z-10 w-16 h-20 postcard-stamp rotate-[4deg] hover:rotate-0 hover:scale-105 transition-all duration-300 pointer-events-auto">
+                  <img 
+                    src={thing.image_url} 
+                    alt="Stamp" 
+                    className="w-full h-full object-cover rounded-[1px]" 
+                  />
+                  {/* Vintage cancellation postmark stamp */}
+                  <div className="absolute -top-3 -left-3 w-10 h-10 border border-dashed border-slate-700/35 rounded-full flex items-center justify-center -rotate-12 pointer-events-none select-none text-[6px] font-patrick text-slate-700/35 font-bold leading-none bg-white/20 backdrop-blur-[0.5px]">
+                    <div className="text-center">
+                      <div>VB LOVE</div>
+                      <div className="text-[5px] mt-0.5">POST</div>
+                    </div>
+                  </div>
+                </div>
+              )}
               
               <div className="mt-4 flex flex-col justify-between h-full">
                 <div>
@@ -251,34 +360,45 @@ export default function GoodThingsPage() {
                       <span>
                         {thing.time} - {new Date(thing.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                       </span>
+                      {currentUser && (thing.user_id === currentUser.id || thing.user_id === '00000000-0000-0000-0000-000000000000') && (
+                        <button 
+                          onClick={(e) => handleDelete(thing.id, e)}
+                          className="text-red-400 hover:text-red-600 hover:scale-110 active:scale-95 transition-all p-1 ml-1"
+                          aria-label="Delete note"
+                        >
+                          <span className="material-symbols-outlined text-base">delete</span>
+                        </button>
+                      )}
                     </div>
-                    {currentUser && (thing.user_id === currentUser.id || thing.user_id === '00000000-0000-0000-0000-000000000000') && (
-                      <button 
-                        onClick={(e) => handleDelete(thing.id, e)}
-                        className="text-red-400 hover:text-red-600 transition-colors p-1"
-                        aria-label="Delete note"
-                      >
-                        <span className="material-symbols-outlined text-lg">delete</span>
-                      </button>
-                    )}
                   </div>
-                  <h3 className="font-gloria text-xl md:text-2xl text-primary mb-3 leading-snug">
+                  <h3 className={`font-gloria text-xl md:text-2xl text-primary mb-3 leading-snug ${thing.image_url ? 'pr-20' : ''}`}>
                     {thing.title}
                   </h3>
                   {thing.description && thing.description !== 'Logged as a daily accomplishment.' && (
-                    <p className="font-patrick text-lg text-on-surface-variant mb-4">
+                    <p className={`font-patrick text-lg text-on-surface-variant mb-4 ${thing.image_url ? 'pr-20' : ''}`}>
                       {thing.description}
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center gap-2 text-primary mt-4 select-none">
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    celebration
-                  </span>
-                  <span className="font-patrick text-sm bg-surface-container px-2 py-0.5 border border-outline rounded">
-                    {thing.tags?.[0] || 'Win'}
-                  </span>
+                <div className="flex justify-between items-center mt-4 select-none pt-2 border-t border-dashed border-outline-variant/40">
+                  {/* Bottom Left: Written by */}
+                  <div className="font-patrick text-sm text-outline flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      edit_note
+                    </span>
+                    <span>Written by <span className="font-bold text-primary">{getAuthorName(thing.user_id)}</span></span>
+                  </div>
+
+                  {/* Bottom Right: Tags */}
+                  <div className="flex items-center gap-2 text-primary">
+                    <span className="material-symbols-outlined text-base" style={{ fontVariationSettings: "'FILL' 1" }}>
+                      celebration
+                    </span>
+                    <span className="font-patrick text-xs bg-surface-container px-2 py-0.5 border border-outline rounded">
+                      {thing.tags?.[0] || 'Win'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
